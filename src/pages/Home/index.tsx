@@ -12,6 +12,7 @@ import {
   StartCountdownButton,
   TaskInput,
 } from './styles'
+import { useState } from 'react'
 
 const newCycleFormValidationSchema = z.object({
   task: z.string().min(1, { message: 'Informe a tarefa' }),
@@ -20,7 +21,14 @@ const newCycleFormValidationSchema = z.object({
 
 type Inputs = z.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle extends Inputs {
+  id: string
+}
+
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
   const { register, handleSubmit, watch, reset } = useForm<Inputs>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
@@ -29,7 +37,20 @@ export function Home() {
     },
   })
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => reset()
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    const id = String(new Date().getTime())
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+    setCycles((state) => [...state, newCycle])
+    setActiveCycleId(id)
+    reset()
+  }
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   const task = watch('task')
   const isSubmitDisabled = !task
