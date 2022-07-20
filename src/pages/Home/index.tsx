@@ -75,7 +75,7 @@ export function Home() {
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   useEffect(() => {
-    let interval: number
+    let interval: ReturnType<typeof setInterval>
 
     if (activeCycle) {
       interval = setInterval(() => {
