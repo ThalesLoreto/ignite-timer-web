@@ -18,7 +18,7 @@ import { differenceInSeconds } from 'date-fns'
 
 const newCycleFormValidationSchema = z.object({
   task: z.string().min(1, { message: 'Informe a tarefa' }),
-  minutesAmount: z.number().min(5).max(60),
+  minutesAmount: z.number().min(1).max(60),
 })
 
 type Inputs = z.infer<typeof newCycleFormValidationSchema>
@@ -27,6 +27,7 @@ interface Cycle extends Inputs {
   id: string
   startDate: Date
   interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -58,8 +59,8 @@ export function Home() {
   }
 
   function handleInterruptCycle() {
-    setCycles(
-      cycles.map((cycle) => {
+    setCycles((state) =>
+      state.map((cycle) => {
         if (cycle.id === activeCycleId) {
           return { ...cycle, interruptedDate: new Date() }
         } else {
@@ -70,25 +71,7 @@ export function Home() {
     setActiveCycleId(null)
   }
 
-  console.log(cycles)
-
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>
-
-    if (activeCycle) {
-      interval = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate),
-        )
-      }, 1000)
-    }
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [activeCycle])
 
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
@@ -98,6 +81,38 @@ export function Home() {
 
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        const secondsDiff = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate,
+        )
+
+        if (secondsDiff >= totalSeconds) {
+          setCycles((state) =>
+            state.map((cycle) => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+          )
+          setAmountSecondsPassed(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setAmountSecondsPassed(secondsDiff)
+        }
+      }, 1000)
+    }
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle, totalSeconds, activeCycleId])
 
   useEffect(() => {
     if (activeCycle) {
@@ -131,7 +146,7 @@ export function Home() {
             type="number"
             placeholder="00"
             step={5}
-            min={5}
+            min={1}
             max={60}
           />
 
