@@ -52,6 +52,10 @@ export function CyclesContextProvider({
       if (storedCycleStateAsJson) {
         return JSON.parse(storedCycleStateAsJson)
       }
+      return {
+        cycles: [],
+        activeCycleId: null,
+      }
     },
   )
 
