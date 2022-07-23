@@ -17,17 +17,17 @@ export const HeaderContainer = styled.header`
       justify-content: center;
       align-items: center;
 
-      color: ${props => props.theme['gray-100']};
+      color: ${(props) => props.theme['gray-100']};
 
       border-top: solid 3px transparent;
       border-bottom: solid 3px transparent;
 
       &:hover {
-        border-bottom: solid 3px ${props => props.theme['green-500']};
+        border-bottom: solid 3px ${(props) => props.theme['green-500']};
       }
 
       &.active {
-        color: ${props => props.theme['green-500']};
+        color: ${(props) => props.theme['green-500']};
       }
     }
   }
